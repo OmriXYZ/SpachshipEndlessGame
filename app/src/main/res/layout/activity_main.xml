@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:layoutDirection="ltr"
     android:background="@drawable/background"
+    android:screenOrientation="portrait"
     tools:context=".MainActivity">
 <!--Heart Images-->
     <LinearLayout
@@ -39,6 +40,30 @@
             app:srcCompat="@drawable/ic_icon_heart" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="22dp"
+        android:layout_alignParentLeft="true"
+        android:orientation="vertical"
+        >
+        <TextView
+            android:id="@+id/main_TXT_odemeter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Distance counter: 0"
+            android:textColor="#D6D6D6"
+            />
+        <TextView
+            android:id="@+id/main_TXT_speed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Speed: moderate"
+            android:textColor="#D6D6D6"
+            />
+    </LinearLayout>
+
 <!--Left and Right Buttons-->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/main_BTN_left"
@@ -64,142 +89,300 @@
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:rowCount="6"
-        android:columnCount="3"
-        android:layout_marginRight="50dp"
-        android:layout_marginLeft="50dp"
+        android:rowCount="8"
+        android:columnCount="5"
+        android:layout_marginRight="25dp"
+        android:layout_marginLeft="25dp"
         android:layout_marginTop="50dp"
         android:layout_marginBottom="80dp"
         >
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock00"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock01"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock02"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock03"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock04"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock10"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock11"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock12"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock13"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock14"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock20"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
+
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock21"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock22"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock23"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock24"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock30"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
+
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock31"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock32"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock33"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock34"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock40"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
+
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock41"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock42"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock43"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock44"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock50"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
+
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock51"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_rock52"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock53"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock54"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock60"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/rock"
             android:visibility="invisible" />
 
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock61"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock62"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock63"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock64"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock70"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
 
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock71"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock72"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock73"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_rock74"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/rock"
+            android:visibility="invisible" />
 
     </GridLayout>
 <!--Spaceship Images-->
@@ -208,39 +391,54 @@
         android:layout_height="100dp"
         android:layout_alignParentBottom="true"
         android:rowCount="1"
-        android:columnCount="3"
-        android:layout_marginRight="50dp"
-        android:layout_marginLeft="50dp"
+        android:columnCount="5"
+        android:layout_marginRight="25dp"
+        android:layout_marginLeft="25dp"
         android:layout_marginTop="50dp"
         android:layout_marginBottom="80dp"
         >
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_spaceship0"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_height="50dp"
+            android:layout_width="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/spaceship"
             android:visibility="invisible"
             />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_spaceship1"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_height="50dp"
+            android:layout_width="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/spaceship"
-            android:visibility="visible"
+            android:visibility="invisible"
 
             />
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/main_IMG_spaceship2"
-            android:layout_height="60dp"
-            android:layout_width="60dp"
-            android:layout_margin="20dp"
+            android:layout_height="50dp"
+            android:layout_width="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/spaceship"
+            android:visibility="visible"
+            />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_spaceship3"
+            android:layout_height="50dp"
+            android:layout_width="50dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/spaceship"
+            android:visibility="invisible"
+            />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/main_IMG_spaceship4"
+            android:layout_height="50dp"
+            android:layout_width="50dp"
+            android:layout_margin="10dp"
             android:src="@drawable/spaceship"
             android:visibility="invisible"
             />
 
     </GridLayout>
-
 
 </RelativeLayout>

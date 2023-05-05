@@ -3,16 +3,30 @@ package com.example.carendlessgame;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
+import static com.example.carendlessgame.GameManager.CENTER_POS;
+import static com.example.carendlessgame.GameManager.MAX_LIVE;
+import static com.example.carendlessgame.GameManager.NUM_COLUMNS;
+import static com.example.carendlessgame.GameManager.NUM_ROWS;
+
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.carendlessgame.Interfaces.StepCallback;
+import com.example.carendlessgame.Utilities.StepDetector;
+import com.example.carendlessgame.models.Spaceship;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 
@@ -25,44 +39,109 @@ public class MainActivity extends AppCompatActivity {
     private ShapeableImageView[][] main_IMG_rocks;
     private FloatingActionButton main_BTN_left;
     private FloatingActionButton main_BTN_right;
+    private TextView main_TXT_odemeter;
+    private TextView main_TXT_speed;
     private Random random = new Random();
-    private static final int NUM_ROWS = 6;
-    private static final int NUM_COLUMNS = 3;
-    private static final int LEFT_POS = 0, CENTER_POS = 1, RIGHT_POS = 2;
-    private final int FALL_ROCKS_DELAY_MS = 500;
-    private final int GENERATE_ROCKS_DELAY_MS = 1000;
+    public static final String KEY_FALL_ROCKS_DELAY_MS = "KEY_FALL_DELAY";
+    public static final String KEY_GENERATE_ROCKS_DELAY_MS = "KEY_GENERATE_DELAY";
     private int theNextRandomRock;
-    private int[] rocksFirstRow = new int[] {0, 0, 0};
+    private int[] rocksFirstRow = new int[] {0, 0, 0, 0, 0};
     private final Handler handler = new Handler();
     private Spaceship spaceship;
-    private static final int MAX_LIVE = 3;
     private boolean isPause = false;
+    private String rock = "rock";
+    private String coin = "coin";
+    private GameManager gameManager;
+    private StepDetector stepDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        main_IMG_rocks = new ShapeableImageView[6][3];
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        main_IMG_rocks = new ShapeableImageView[NUM_ROWS][NUM_COLUMNS];
         findViews();
-        spaceship = new Spaceship(MAX_LIVE, CENTER_POS);
-        main_BTN_left.setOnClickListener(v -> MoveTheSpaceship(-1));
-        main_BTN_right.setOnClickListener(v -> MoveTheSpaceship(1));
-        handler.postDelayed(generateRocks, 0);
-        handler.postDelayed(fallingRocks, 0);
+        Intent prevIntent = getIntent();
+        boolean isSensor = prevIntent.getBooleanExtra("IsSensor", false);
+        if (!isSensor) {
+            int fall_delay = prevIntent.getIntExtra(KEY_FALL_ROCKS_DELAY_MS,0);
+            int generate_delay = prevIntent.getIntExtra(KEY_GENERATE_ROCKS_DELAY_MS,0);
+            gameManager = new GameManager(fall_delay, generate_delay);
+            main_BTN_left.setOnClickListener(v -> MoveTheSpaceship(-1));
+            main_BTN_right.setOnClickListener(v -> MoveTheSpaceship(1));
+        } else {
+            initStepDetector();
+            gameManager = new GameManager();
+            main_BTN_left.setVisibility(INVISIBLE);
+            main_BTN_right.setVisibility(INVISIBLE);
+
+        }
+
+        spaceship = new Spaceship(NUM_COLUMNS/2);
+
+        handler.postDelayed(generateRocks, 75);
+        handler.postDelayed(fallingRocks, 75);
+    }
+
+    private void initStepDetector() {
+        stepDetector = new StepDetector(this, new StepCallback() {
+            @Override
+            public void stepX() {
+                MoveTheSpaceshipBySensors(stepDetector.getX());
+            }
+
+            @Override
+            public void stepY() {
+                int stepY = stepDetector.getY()-4;
+                if (stepY >= -2 && stepY <= 2)
+                    gameManager.changeDelaysByStepY((stepY)*70);
+                switch (stepY) {
+                    case 0:
+                        main_TXT_speed.setText("Speed: moderate");
+                        main_TXT_speed.setTextColor(Color.rgb(255, 255, 255));
+                        break;
+                    case -1:
+                        main_TXT_speed.setText("Speed: fast");
+                        main_TXT_speed.setTextColor(Color.rgb(181, 223, 255));
+                        break;
+                    case -2:
+                        main_TXT_speed.setText("Speed: very fast");
+                        main_TXT_speed.setTextColor(Color.rgb(122, 198, 255));
+                        break;
+                    case 1:
+                        main_TXT_speed.setText("Speed: slow");
+                        main_TXT_speed.setTextColor(Color.rgb(255, 181, 181));
+                        break;
+                    case 2:
+                        main_TXT_speed.setText("Speed: very slow");
+                        main_TXT_speed.setTextColor(Color.rgb(255, 122, 122));
+                        break;
+
+                }
+            }
+
+            @Override
+            public void stepZ() {
+                // Pass
+            }
+        });
     }
 
     protected void onResume() {
         super.onResume();
+        if (gameManager.isSensorGame)
+            stepDetector.start();
         if (isPause) {
             handler.postDelayed(generateRocks, 0);
             handler.postDelayed(fallingRocks, 0);
         }
     }
-
     @Override
     protected void onPause() {
         super.onPause();
         isPause = true;
+        if (gameManager.isSensorGame)
+            stepDetector.stop();
     }
     @Override
     protected void onStop() {
@@ -88,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
     private Runnable fallingRocks = new Runnable() {
         @Override
         public void run() {
+            main_TXT_odemeter.setText("Distance counter: " + gameManager.addOneDistance());
             for (int row = NUM_ROWS-1; row >= 0; row--) {
                 for (int col = 0; col < NUM_COLUMNS; col++) {
                     ShapeableImageView checkRock = main_IMG_rocks[row][col];
@@ -96,24 +176,36 @@ public class MainActivity extends AppCompatActivity {
                     else if(checkRock.getVisibility() == VISIBLE) {
                         checkRock.setVisibility(INVISIBLE);
                         checkRock = main_IMG_rocks[row+1][col];
+                        Drawable lastDraw = main_IMG_rocks[row][col].getDrawable();
+                        String lastTag = (String) main_IMG_rocks[row][col].getTag();
+                        checkRock.setImageDrawable(lastDraw);
+                        checkRock.setTag(lastTag);
                         checkRock.setVisibility(VISIBLE);
                     }
                     if (rocksFirstRow[col] == 1 && row==0) {
+                        if (random.nextInt(5) == 0) {
+                            main_IMG_rocks[0][col].setImageResource(R.drawable.coin);
+                            checkRock.setTag(coin);
+                        }
+                        else {
+                            main_IMG_rocks[0][col].setImageResource(R.drawable.rock);
+                            checkRock.setTag(rock);
+                        }
                         main_IMG_rocks[0][col].setVisibility(VISIBLE);
                         rocksFirstRow[col] = 0;
                     }
                 }
             }
             checkSpaceshipCollison();
-            handler.postDelayed(this, FALL_ROCKS_DELAY_MS);
+            handler.postDelayed(this, gameManager.getFall_rocks_delay_ms());
         }
     };
 
     private Runnable generateRocks = new Runnable() {
         @Override
         public void run() {
-            handler.postDelayed(generateRocks, GENERATE_ROCKS_DELAY_MS);
-            theNextRandomRock = random.nextInt(3);
+            handler.postDelayed(generateRocks, gameManager.getGenerate_rocks_delay_ms());
+            theNextRandomRock = random.nextInt(NUM_COLUMNS);
             rocksFirstRow[theNextRandomRock] = 1;
         }
     };
@@ -121,7 +213,9 @@ public class MainActivity extends AppCompatActivity {
         main_IMG_spaceships = new ShapeableImageView[]{
                 findViewById(R.id.main_IMG_spaceship0),
                 findViewById(R.id.main_IMG_spaceship1),
-                findViewById(R.id.main_IMG_spaceship2)};
+                findViewById(R.id.main_IMG_spaceship2),
+                findViewById(R.id.main_IMG_spaceship3),
+                findViewById(R.id.main_IMG_spaceship4)};
         main_IMG_hearts = new ShapeableImageView[]{
                 findViewById(R.id.main_IMG_heart1),
                 findViewById(R.id.main_IMG_heart2),
@@ -132,60 +226,100 @@ public class MainActivity extends AppCompatActivity {
         main_IMG_rocks[0][0] = findViewById(R.id.main_IMG_rock00);
         main_IMG_rocks[0][1] = findViewById(R.id.main_IMG_rock01);
         main_IMG_rocks[0][2] = findViewById(R.id.main_IMG_rock02);
+        main_IMG_rocks[0][3] = findViewById(R.id.main_IMG_rock03);
+        main_IMG_rocks[0][4] = findViewById(R.id.main_IMG_rock04);
 
         main_IMG_rocks[1][0] = findViewById(R.id.main_IMG_rock10);
         main_IMG_rocks[1][1] = findViewById(R.id.main_IMG_rock11);
         main_IMG_rocks[1][2] = findViewById(R.id.main_IMG_rock12);
+        main_IMG_rocks[1][3] = findViewById(R.id.main_IMG_rock13);
+        main_IMG_rocks[1][4] = findViewById(R.id.main_IMG_rock14);
 
         main_IMG_rocks[2][0] = findViewById(R.id.main_IMG_rock20);
         main_IMG_rocks[2][1] = findViewById(R.id.main_IMG_rock21);
         main_IMG_rocks[2][2] = findViewById(R.id.main_IMG_rock22);
+        main_IMG_rocks[2][3] = findViewById(R.id.main_IMG_rock23);
+        main_IMG_rocks[2][4] = findViewById(R.id.main_IMG_rock24);
 
         main_IMG_rocks[3][0] = findViewById(R.id.main_IMG_rock30);
         main_IMG_rocks[3][1] = findViewById(R.id.main_IMG_rock31);
         main_IMG_rocks[3][2] = findViewById(R.id.main_IMG_rock32);
+        main_IMG_rocks[3][3] = findViewById(R.id.main_IMG_rock33);
+        main_IMG_rocks[3][4] = findViewById(R.id.main_IMG_rock34);
 
         main_IMG_rocks[4][0] = findViewById(R.id.main_IMG_rock40);
         main_IMG_rocks[4][1] = findViewById(R.id.main_IMG_rock41);
         main_IMG_rocks[4][2] = findViewById(R.id.main_IMG_rock42);
+        main_IMG_rocks[4][3] = findViewById(R.id.main_IMG_rock43);
+        main_IMG_rocks[4][4] = findViewById(R.id.main_IMG_rock44);
 
         main_IMG_rocks[5][0] = findViewById(R.id.main_IMG_rock50);
         main_IMG_rocks[5][1] = findViewById(R.id.main_IMG_rock51);
         main_IMG_rocks[5][2] = findViewById(R.id.main_IMG_rock52);
+        main_IMG_rocks[5][3] = findViewById(R.id.main_IMG_rock53);
+        main_IMG_rocks[5][4] = findViewById(R.id.main_IMG_rock54);
+
+        main_IMG_rocks[6][0] = findViewById(R.id.main_IMG_rock60);
+        main_IMG_rocks[6][1] = findViewById(R.id.main_IMG_rock61);
+        main_IMG_rocks[6][2] = findViewById(R.id.main_IMG_rock62);
+        main_IMG_rocks[6][3] = findViewById(R.id.main_IMG_rock63);
+        main_IMG_rocks[6][4] = findViewById(R.id.main_IMG_rock64);
+
+        main_IMG_rocks[7][0] = findViewById(R.id.main_IMG_rock70);
+        main_IMG_rocks[7][1] = findViewById(R.id.main_IMG_rock71);
+        main_IMG_rocks[7][2] = findViewById(R.id.main_IMG_rock72);
+        main_IMG_rocks[7][3] = findViewById(R.id.main_IMG_rock73);
+        main_IMG_rocks[7][4] = findViewById(R.id.main_IMG_rock74);
+
+        main_TXT_odemeter = findViewById(R.id.main_TXT_odemeter);
+        main_TXT_speed = findViewById(R.id.main_TXT_speed);
+
     }
 
     private void MoveTheSpaceship(int positionIndex) {
-        int newSpaceshipPosition = spaceship.spaceshipPosition + positionIndex;
-        boolean checkOutOfGrid = newSpaceshipPosition > RIGHT_POS || newSpaceshipPosition < LEFT_POS;
+        int newSpaceshipPosition = spaceship.getSpaceshipPosition() + positionIndex;
+        boolean checkOutOfGrid = newSpaceshipPosition >= NUM_COLUMNS || newSpaceshipPosition < 0;
         if (checkOutOfGrid) return;
-        main_IMG_spaceships[spaceship.spaceshipPosition].setVisibility(INVISIBLE);
-        spaceship.spaceshipPosition = newSpaceshipPosition;
-        main_IMG_spaceships[spaceship.spaceshipPosition].setVisibility(VISIBLE);
+        main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(INVISIBLE);
+        spaceship.setSpaceshipPosition(newSpaceshipPosition);
+        main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(VISIBLE);
+        checkSpaceshipCollison();
+    }
+
+    private void MoveTheSpaceshipBySensors(int sensorX) {
+        int newSpaceshipPosition;
+        if (sensorX > -3 && sensorX < 3)
+            newSpaceshipPosition = sensorX+2;
+        else return;
+        main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(INVISIBLE);
+        spaceship.setSpaceshipPosition(newSpaceshipPosition);
+        main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(VISIBLE);
         checkSpaceshipCollison();
     }
 
     public void checkSpaceshipCollison() {
-        ShapeableImageView rock_toCheck = main_IMG_rocks[NUM_ROWS-1][spaceship.spaceshipPosition];
-        if (rock_toCheck.getVisibility() == VISIBLE) {
-            rock_toCheck.setVisibility(INVISIBLE);
-            onSpaceshipHurt();
-        }
+        ShapeableImageView rock_toCheck = main_IMG_rocks[NUM_ROWS-1][spaceship.getSpaceshipPosition()];
+        if (rock_toCheck.getTag() != null && rock_toCheck.getTag().equals(rock))
+            if (rock_toCheck.getVisibility() == VISIBLE) {
+                rock_toCheck.setVisibility(INVISIBLE);
+                onSpaceshipHurt();
+            }
     }
 
     public void onSpaceshipHurt() {
         fireToastAndVibrate();
-        if (spaceship.lives - 1 <= 0)
+        if (gameManager.getLives() - 1 <= 0)
             onSpaceshipCrash();
         else {
-            spaceship.lives--;
-            main_IMG_hearts[2- spaceship.lives].setVisibility(INVISIBLE);
+            gameManager.decreaseLive();
+            main_IMG_hearts[2- gameManager.getLives()].setVisibility(INVISIBLE);
         }
     }
 
     public void onSpaceshipCrash() {
-        spaceship.lives = MAX_LIVE;
-        main_IMG_spaceships[spaceship.spaceshipPosition].setVisibility(INVISIBLE);
-        spaceship.spaceshipPosition = CENTER_POS;
+        gameManager.resetGame();
+        main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(INVISIBLE);
+        spaceship.resetSpaceshipPosition(CENTER_POS);
         main_IMG_spaceships[CENTER_POS].setVisibility(VISIBLE);
         for (ShapeableImageView img_heart : main_IMG_hearts)
             img_heart.setVisibility(VISIBLE);
@@ -194,16 +328,6 @@ public class MainActivity extends AppCompatActivity {
                 rock.setVisibility(INVISIBLE);
             }
 
-    }
-
-    public class Spaceship {
-        private int lives;
-        private int spaceshipPosition;
-
-        public Spaceship(int lives, int spaceshipPosition) {
-            this.lives = lives;
-            this.spaceshipPosition = spaceshipPosition;
-        }
     }
 
     public void fireToastAndVibrate() {
@@ -216,6 +340,7 @@ public class MainActivity extends AppCompatActivity {
                 v.vibrate(500);
             }
     }
+
 }
 
 

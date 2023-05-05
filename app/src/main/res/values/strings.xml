@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Spaceship Endless Game</string>
+    <string name="title_activity_menu">MenuActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_activity_score">ScoreActivity</string>
+    <string name="apikey">AIzaSyDoVnPHdHhrhfE77FYd73nlNzk8IA0qDjg</string>
 </resources>
