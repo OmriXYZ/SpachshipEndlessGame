@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 import com.example.carendlessgame.Interfaces.StepCallback;
 
@@ -34,10 +35,13 @@ public class StepDetector {
             public void onSensorChanged(SensorEvent event) {
                 float x = event.values[0];
                 float y = event.values[1];
+                float z = event.values[2];
                 stepX = -(int) (x / 1.5);
                 stepY =  (int) (y / 1.5);
                 stepCallback.stepX();
                 stepCallback.stepY();
+                stepCallback.stepZ();
+                System.out.println("z: " + z +"    x: "+x);
             }
 
             @Override

@@ -1,6 +1,14 @@
 package com.example.carendlessgame;
 
 
+import android.util.Log;
+
+import com.example.carendlessgame.Utilities.MySPv3;
+import com.example.carendlessgame.models.Record;
+import com.example.carendlessgame.models.Records;
+import com.google.gson.Gson;
+
+
 public class GameManager {
 
     public static final int NUM_ROWS = 8;
@@ -11,7 +19,6 @@ public class GameManager {
     private int distance;
     private int fall_rocks_delay_ms;
     private int generate_rocks_delay_ms;
-
     public boolean isSensorGame;
 
     public GameManager(int fall_delay, int generate_delay) {
@@ -57,5 +64,19 @@ public class GameManager {
     public void changeDelaysByStepY(int stepY) {
         fall_rocks_delay_ms = 500 + stepY;
         generate_rocks_delay_ms = fall_rocks_delay_ms*2;
+    }
+
+    public int getDistance() {
+        return distance;
+    }
+    public void lose() {
+        Records records = new Records();
+//        Log.d("json: ", records.toJson());
+        records.add(new Record(distance, "omri"));
+        MySPv3.getInstance().putString("records", records.toJson());
+        String fromSP = MySPv3.getInstance().getString("records","");
+        Records recordsFromJson = new Gson().fromJson(fromSP, Records.class);
+        Log.d("Records from json:", fromSP);
+
     }
 }

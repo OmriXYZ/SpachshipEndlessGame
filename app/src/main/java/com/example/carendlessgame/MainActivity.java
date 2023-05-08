@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
     private String coin = "coin";
     private GameManager gameManager;
     private StepDetector stepDetector;
+    private boolean moveToLoseScreen = true;
+    private int lastSensorX = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         stepDetector = new StepDetector(this, new StepCallback() {
             @Override
             public void stepX() {
-                MoveTheSpaceshipBySensors(stepDetector.getX());
+                MoveTheSpaceshipBySensors2(stepDetector.getX());
             }
 
             @Override
@@ -296,6 +298,14 @@ public class MainActivity extends AppCompatActivity {
         main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(VISIBLE);
         checkSpaceshipCollison();
     }
+    private void MoveTheSpaceshipBySensors2(int sensorX) {
+        if (sensorX == lastSensorX) return;
+        else if (sensorX > 2)
+            MoveTheSpaceship(1);
+        else if (sensorX < -2)
+            MoveTheSpaceship(-1);
+        lastSensorX = sensorX;
+    }
 
     public void checkSpaceshipCollison() {
         ShapeableImageView rock_toCheck = main_IMG_rocks[NUM_ROWS-1][spaceship.getSpaceshipPosition()];
@@ -317,17 +327,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onSpaceshipCrash() {
-        gameManager.resetGame();
-        main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(INVISIBLE);
-        spaceship.resetSpaceshipPosition(CENTER_POS);
-        main_IMG_spaceships[CENTER_POS].setVisibility(VISIBLE);
-        for (ShapeableImageView img_heart : main_IMG_hearts)
-            img_heart.setVisibility(VISIBLE);
-        for (ShapeableImageView[] rocks_inRow: main_IMG_rocks)
-            for (ShapeableImageView rock: rocks_inRow) {
-                rock.setVisibility(INVISIBLE);
-            }
+//        gameManager.resetGame();
+//        main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(INVISIBLE);
+//        spaceship.resetSpaceshipPosition(CENTER_POS);
+//        main_IMG_spaceships[CENTER_POS].setVisibility(VISIBLE);
+//        for (ShapeableImageView img_heart : main_IMG_hearts)
+//            img_heart.setVisibility(VISIBLE);
+//        for (ShapeableImageView[] rocks_inRow: main_IMG_rocks)
+//            for (ShapeableImageView rock: rocks_inRow) {
+//                rock.setVisibility(INVISIBLE);
+//            }
+        if (moveToLoseScreen) {
+            gameManager.lose();
+            openLoseScreen(gameManager.getDistance());
+            moveToLoseScreen = false;
+        }
 
+    }
+    private void openLoseScreen(int distance) {
+        Intent loseIntent = new Intent(this, LoseActivity.class);
+        loseIntent.putExtra("Distance", distance);
+        startActivity(loseIntent);
+        finish();
     }
 
     public void fireToastAndVibrate() {

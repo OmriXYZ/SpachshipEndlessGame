@@ -3,21 +3,11 @@ package com.example.carendlessgame;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
-import com.example.carendlessgame.databinding.ActivityMenuBinding;
-import com.google.android.material.imageview.ShapeableImageView;
 
 public class MenuActivity extends AppCompatActivity {
 
-    Button menu_BTN_fast, menu_BTN_slow, menu_BTN_sensor;
+    Button menu_BTN_fast, menu_BTN_slow, menu_BTN_sensor, menu_BTN_records;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,12 +17,14 @@ public class MenuActivity extends AppCompatActivity {
         menu_BTN_slow.setOnClickListener(v -> openGameScreen(500));
         menu_BTN_fast.setOnClickListener(v -> openGameScreen(250));
         menu_BTN_sensor.setOnClickListener(v -> openSensorGameScreen());
+        menu_BTN_records.setOnClickListener(v -> openRecordsScreen());
 
     }
     private void findViews() {
         menu_BTN_fast = findViewById(R.id.menu_BTN_fast);
         menu_BTN_slow = findViewById(R.id.menu_BTN_slow);
         menu_BTN_sensor = findViewById(R.id.menu_BTN_sensor);
+        menu_BTN_records = findViewById(R.id.menu_BTN_records);
     }
 
     private void openGameScreen(int falling_delay) {
@@ -46,6 +38,11 @@ public class MenuActivity extends AppCompatActivity {
     private void openSensorGameScreen() {
         Intent gameIntent = new Intent(this, MainActivity.class);
         gameIntent.putExtra("IsSensor", true);
+        startActivity(gameIntent);
+        finish();
+    }
+    private void openRecordsScreen() {
+        Intent gameIntent = new Intent(this, ScoreActivity.class);
         startActivity(gameIntent);
         finish();
     }
