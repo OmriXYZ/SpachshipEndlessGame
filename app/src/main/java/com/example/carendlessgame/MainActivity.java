@@ -11,22 +11,32 @@ import static com.example.carendlessgame.GameManager.NUM_ROWS;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.example.carendlessgame.Interfaces.StepCallback;
+import com.example.carendlessgame.Utilities.SignalGenerator;
 import com.example.carendlessgame.Utilities.StepDetector;
+import com.example.carendlessgame.models.Records;
 import com.example.carendlessgame.models.Spaceship;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 
@@ -45,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String KEY_FALL_ROCKS_DELAY_MS = "KEY_FALL_DELAY";
     public static final String KEY_GENERATE_ROCKS_DELAY_MS = "KEY_GENERATE_DELAY";
     private int theNextRandomRock;
-    private int[] rocksFirstRow = new int[] {0, 0, 0, 0, 0};
+    private int[] rocksFirstRow = new int[]{0, 0, 0, 0, 0};
     private final Handler handler = new Handler();
     private Spaceship spaceship;
     private boolean isPause = false;
@@ -55,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
     private StepDetector stepDetector;
     private boolean moveToLoseScreen = true;
     private int lastSensorX = 0;
+    private LatLng userLatLng;
+    LocationManager locationManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +79,8 @@ public class MainActivity extends AppCompatActivity {
         Intent prevIntent = getIntent();
         boolean isSensor = prevIntent.getBooleanExtra("IsSensor", false);
         if (!isSensor) {
-            int fall_delay = prevIntent.getIntExtra(KEY_FALL_ROCKS_DELAY_MS,0);
-            int generate_delay = prevIntent.getIntExtra(KEY_GENERATE_ROCKS_DELAY_MS,0);
+            int fall_delay = prevIntent.getIntExtra(KEY_FALL_ROCKS_DELAY_MS, 0);
+            int generate_delay = prevIntent.getIntExtra(KEY_GENERATE_ROCKS_DELAY_MS, 0);
             gameManager = new GameManager(fall_delay, generate_delay);
             main_BTN_left.setOnClickListener(v -> MoveTheSpaceship(-1));
             main_BTN_right.setOnClickListener(v -> MoveTheSpaceship(1));
@@ -76,13 +89,14 @@ public class MainActivity extends AppCompatActivity {
             gameManager = new GameManager();
             main_BTN_left.setVisibility(INVISIBLE);
             main_BTN_right.setVisibility(INVISIBLE);
-
         }
 
-        spaceship = new Spaceship(NUM_COLUMNS/2);
+        spaceship = new Spaceship(NUM_COLUMNS / 2);
 
         handler.postDelayed(generateRocks, 75);
         handler.postDelayed(fallingRocks, 75);
+
+        locationManager = new LocationManager(this);
     }
 
     private void initStepDetector() {
@@ -94,9 +108,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void stepY() {
-                int stepY = stepDetector.getY()-4;
+                int stepY = stepDetector.getY() - 4;
                 if (stepY >= -2 && stepY <= 2)
-                    gameManager.changeDelaysByStepY((stepY)*70);
+                    gameManager.changeDelaysByStepY((stepY) * 70);
                 switch (stepY) {
                     case 0:
                         main_TXT_speed.setText("Speed: moderate");
@@ -138,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
             handler.postDelayed(fallingRocks, 0);
         }
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -145,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
         if (gameManager.isSensorGame)
             stepDetector.stop();
     }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -155,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
             vibrator.cancel();
         }
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -170,26 +187,25 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             main_TXT_odemeter.setText("Distance counter: " + gameManager.addOneDistance());
-            for (int row = NUM_ROWS-1; row >= 0; row--) {
+            for (int row = NUM_ROWS - 1; row >= 0; row--) {
                 for (int col = 0; col < NUM_COLUMNS; col++) {
                     ShapeableImageView checkRock = main_IMG_rocks[row][col];
-                    if (checkRock.getVisibility() == VISIBLE && row == NUM_ROWS-1)
+                    if (checkRock.getVisibility() == VISIBLE && row == NUM_ROWS - 1)
                         checkRock.setVisibility(INVISIBLE);
-                    else if(checkRock.getVisibility() == VISIBLE) {
+                    else if (checkRock.getVisibility() == VISIBLE) {
                         checkRock.setVisibility(INVISIBLE);
-                        checkRock = main_IMG_rocks[row+1][col];
+                        checkRock = main_IMG_rocks[row + 1][col];
                         Drawable lastDraw = main_IMG_rocks[row][col].getDrawable();
                         String lastTag = (String) main_IMG_rocks[row][col].getTag();
                         checkRock.setImageDrawable(lastDraw);
                         checkRock.setTag(lastTag);
                         checkRock.setVisibility(VISIBLE);
                     }
-                    if (rocksFirstRow[col] == 1 && row==0) {
+                    if (rocksFirstRow[col] == 1 && row == 0) {
                         if (random.nextInt(5) == 0) {
                             main_IMG_rocks[0][col].setImageResource(R.drawable.coin);
                             checkRock.setTag(coin);
-                        }
-                        else {
+                        } else {
                             main_IMG_rocks[0][col].setImageResource(R.drawable.rock);
                             checkRock.setTag(rock);
                         }
@@ -211,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
             rocksFirstRow[theNextRandomRock] = 1;
         }
     };
+
     private void findViews() {
         main_IMG_spaceships = new ShapeableImageView[]{
                 findViewById(R.id.main_IMG_spaceship0),
@@ -291,13 +308,14 @@ public class MainActivity extends AppCompatActivity {
     private void MoveTheSpaceshipBySensors(int sensorX) {
         int newSpaceshipPosition;
         if (sensorX > -3 && sensorX < 3)
-            newSpaceshipPosition = sensorX+2;
+            newSpaceshipPosition = sensorX + 2;
         else return;
         main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(INVISIBLE);
         spaceship.setSpaceshipPosition(newSpaceshipPosition);
         main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(VISIBLE);
         checkSpaceshipCollison();
     }
+
     private void MoveTheSpaceshipBySensors2(int sensorX) {
         if (sensorX == lastSensorX) return;
         else if (sensorX > 2)
@@ -308,58 +326,51 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void checkSpaceshipCollison() {
-        ShapeableImageView rock_toCheck = main_IMG_rocks[NUM_ROWS-1][spaceship.getSpaceshipPosition()];
-        if (rock_toCheck.getTag() != null && rock_toCheck.getTag().equals(rock))
-            if (rock_toCheck.getVisibility() == VISIBLE) {
-                rock_toCheck.setVisibility(INVISIBLE);
+        ShapeableImageView rock_toCheck = main_IMG_rocks[NUM_ROWS - 1][spaceship.getSpaceshipPosition()];
+        if (rock_toCheck.getTag() != null && rock_toCheck.getVisibility() == VISIBLE) {
+            rock_toCheck.setVisibility(INVISIBLE);
+            if (rock_toCheck.getTag().equals(rock))
                 onSpaceshipHurt();
-            }
+            else if (rock_toCheck.getTag().equals(coin))
+                onSpaceshipEarnCoin();
+
+        }
+    }
+
+    private void onSpaceshipEarnCoin() {
+        gameManager.earnCoin();
+        SignalGenerator.getInstance().showToast("Earn Coin!!", 500);
+        SignalGenerator.getInstance().vibrate(50);
+        SignalGenerator.getInstance().vibrate(50);
+
     }
 
     public void onSpaceshipHurt() {
-        fireToastAndVibrate();
+//        fireToastAndVibrate();
+        SignalGenerator.getInstance().showToast("Crash!!", 500);
+        SignalGenerator.getInstance().vibrate(100);
         if (gameManager.getLives() - 1 <= 0)
             onSpaceshipCrash();
         else {
             gameManager.decreaseLive();
-            main_IMG_hearts[2- gameManager.getLives()].setVisibility(INVISIBLE);
+            main_IMG_hearts[2 - gameManager.getLives()].setVisibility(INVISIBLE);
         }
     }
 
     public void onSpaceshipCrash() {
-//        gameManager.resetGame();
-//        main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(INVISIBLE);
-//        spaceship.resetSpaceshipPosition(CENTER_POS);
-//        main_IMG_spaceships[CENTER_POS].setVisibility(VISIBLE);
-//        for (ShapeableImageView img_heart : main_IMG_hearts)
-//            img_heart.setVisibility(VISIBLE);
-//        for (ShapeableImageView[] rocks_inRow: main_IMG_rocks)
-//            for (ShapeableImageView rock: rocks_inRow) {
-//                rock.setVisibility(INVISIBLE);
-//            }
         if (moveToLoseScreen) {
-            gameManager.lose();
+            gameManager.lose(locationManager.getLon(), locationManager.getLat());
             openLoseScreen(gameManager.getDistance());
             moveToLoseScreen = false;
         }
 
     }
+
     private void openLoseScreen(int distance) {
         Intent loseIntent = new Intent(this, LoseActivity.class);
         loseIntent.putExtra("Distance", distance);
         startActivity(loseIntent);
         finish();
-    }
-
-    public void fireToastAndVibrate() {
-        Toast.makeText(getApplicationContext(),"Crash!!",Toast.LENGTH_LONG).show();
-            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                v.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
-            } else {
-                //deprecated in API 26
-                v.vibrate(500);
-            }
     }
 
 }

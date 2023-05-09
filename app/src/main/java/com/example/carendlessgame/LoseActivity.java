@@ -27,8 +27,8 @@ public class LoseActivity extends AppCompatActivity {
         lose_BTN_menu = findViewById(R.id.lose_BTN_menu);
         lose_BTN_records = findViewById(R.id.lose_BTN_records);
         lose_TXT_meters = findViewById(R.id.lose_TXT_meters);
-
     }
+
     private void openRecordsScreen() {
         Intent gameIntent = new Intent(this, ScoreActivity.class);
         startActivity(gameIntent);

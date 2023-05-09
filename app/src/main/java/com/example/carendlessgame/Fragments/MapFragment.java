@@ -19,64 +19,30 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.textview.MaterialTextView;
 
 public class MapFragment extends Fragment {
-
-    private MaterialTextView map_LBL_title;
-
-    private MapView map_MAP_view;
-
-    private SupportMapFragment mapFragment;
-
-
+    private GoogleMap mMap;
+    private OnMapReadyCallback callback = googleMap -> { mMap = googleMap; };
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
-
-        // Initialize map fragment
-        mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_MAP_view);
-
-        mapFragment.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                // When map is loaded
-                googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                    @Override
-                    public void onMapClick(LatLng latLng) {
-                        // When clicked on map
-                        // Initialize marker options
-                        MarkerOptions markerOptions=new MarkerOptions();
-                        // Set position of marker
-                        markerOptions.position(latLng);
-                        // Set title of marker
-                        markerOptions.title(latLng.latitude+" : "+latLng.longitude);
-                        // Remove all marker
-                        googleMap.clear();
-                        // Animating to zoom the marker
-                        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,10));
-                        // Add marker on map
-                        googleMap.addMarker(markerOptions);
-                    }
-                });
-            }
-        });
+        SupportMapFragment supportMapFragment = (SupportMapFragment)
+                getChildFragmentManager().findFragmentById(R.id.map_MAP_view);
+        //Async
+        supportMapFragment.getMapAsync(callback);
         return view;
     }
 
+    public void markOnMap(double x, double y) {
+        LatLng point = new LatLng(x, y);
+        mMap.addMarker(new MarkerOptions().position(point).title(""));
+        moveToCurrentLocation(point);
 
-
-    public void zoomOnRecord(String name){
-        map_LBL_title.setText(name);
     }
 
-
-
-//    @Override
-//    public void onMapReady(@NonNull GoogleMap googleMap) {
-//        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-//            @Override
-//            public void onMapClick(@NonNull LatLng latLng) {
-//                System.out.println("click map");
-//            }
-//        });
-//    }
+    private void moveToCurrentLocation(LatLng currentLocation)
+    {
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,15));
+        mMap.animateCamera(CameraUpdateFactory.zoomIn());
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(14), 2000, null);
+    }
 }

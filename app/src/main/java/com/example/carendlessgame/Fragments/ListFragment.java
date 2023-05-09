@@ -1,19 +1,25 @@
 package com.example.carendlessgame.Fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import androidx.appcompat.widget.AppCompatEditText;
 import androidx.fragment.app.Fragment;
 
 import com.example.carendlessgame.Interfaces.CallBack_SendClick;
 import com.example.carendlessgame.R;
+import com.example.carendlessgame.Utilities.MySPv3;
+import com.example.carendlessgame.models.Record;
 import com.example.carendlessgame.models.Records;
-import com.google.android.material.button.MaterialButton;
 import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ListFragment extends Fragment {
 
@@ -29,19 +35,35 @@ public class ListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list, container, false);
         findViews(view);
-        String js = MSPV3.getMe().getString("MY_DB", "");
-        Records md = new Gson().fromJson(js, Records.class);
+        String fromSP = MySPv3.getInstance().getString("records","");
+        Records recordsFromJson = new Gson().fromJson(fromSP, Records.class);
+        List<String> itemList = new ArrayList<>();
+
+        if (recordsFromJson != null) {
+            for (int i = 0; i < recordsFromJson.getRecords().size(); i++) {
+                itemList.add(recordsFromJson.getRecords().get(i).getScore() + "");
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(view.getContext(),
+                    android.R.layout.simple_list_item_1, itemList);
+            list_LST_records.setAdapter(adapter);
+            list_LST_records.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view,
+                                        int position, long id) {
+                    callBack_sendClick.mark(recordsFromJson.getRecords().get(position).getLat(),recordsFromJson.getRecords().get(position).getLon());
+                }
+            });
+        }
+        else {
+            return view;
+        }
+
         return view;
     }
 
-    private void sendClicked() {
-//        if (callBack_sendClick != null)
-//            callBack_sendClick.userNameChosen(list_ET_name.getText().toString());
-    }
 
     private void findViews(View view) {
-//        list_ET_name = view.findViewById(R.id.list_ET_name);
-//        list_BTN_send = view.findViewById(R.id.list_BTN_send);
         list_LST_records = view.findViewById(R.id.list_LST_records);
     }
+
 }

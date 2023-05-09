@@ -9,10 +9,17 @@ import java.util.Comparator;
 public class Records {
 
     private ArrayList<Record> records = new ArrayList<>();
+//    private static Records myDB;
 
     public Records() {
 
     }
+//    public static Records initMyDB() {
+//        if (myDB == null) {
+//            myDB = new Records();
+//        }
+//        return myDB;
+//    }
 
     public void add(Record record) {
         records.add(record);
@@ -27,5 +34,7 @@ public class Records {
         return gson.toJson(this);
     }
 
-
+    public ArrayList<Record> getRecords() {
+        return records;
+    }
 }

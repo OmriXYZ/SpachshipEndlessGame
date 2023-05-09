@@ -2,18 +2,22 @@ package com.example.carendlessgame.models;
 
 public class Record {
     private int score;
-    private String coordinate;
 
-    public Record(int score, String coordinate) {
+    private double lon, lat;
+
+    public Record(int score, double lon, double lat) {
         this.score = score;
-        this.coordinate = coordinate;
+        this.lon = lon;
+        this.lat = lat;
     }
 
     public int getScore() {
         return score;
     }
-
-    public String getCoordinate() {
-        return coordinate;
+    public double getLon() {
+        return lon;
+    }
+    public double getLat() {
+        return lat;
     }
 }

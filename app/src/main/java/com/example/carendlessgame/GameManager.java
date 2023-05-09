@@ -6,6 +6,7 @@ import android.util.Log;
 import com.example.carendlessgame.Utilities.MySPv3;
 import com.example.carendlessgame.models.Record;
 import com.example.carendlessgame.models.Records;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 
 
@@ -69,14 +70,24 @@ public class GameManager {
     public int getDistance() {
         return distance;
     }
-    public void lose() {
-        Records records = new Records();
-//        Log.d("json: ", records.toJson());
-        records.add(new Record(distance, "omri"));
-        MySPv3.getInstance().putString("records", records.toJson());
+    public void lose(double lon, double lat) {
+
+//        Log.d("latlng:", lon+"");
         String fromSP = MySPv3.getInstance().getString("records","");
         Records recordsFromJson = new Gson().fromJson(fromSP, Records.class);
+        if (recordsFromJson != null)
+            recordsFromJson.add(new Record(distance, lon, lat));
+        else {
+            recordsFromJson = new Records();
+            recordsFromJson.add(new Record(distance, lon, lat));
+        }
+        MySPv3.getInstance().putString("records", recordsFromJson.toJson());
+        fromSP = MySPv3.getInstance().getString("records","");
         Log.d("Records from json:", fromSP);
 
+    }
+
+    public void earnCoin() {
+        distance+=10;
     }
 }
