@@ -3,40 +3,28 @@ package com.example.carendlessgame;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
-import static com.example.carendlessgame.GameManager.CENTER_POS;
-import static com.example.carendlessgame.GameManager.MAX_LIVE;
 import static com.example.carendlessgame.GameManager.NUM_COLUMNS;
 import static com.example.carendlessgame.GameManager.NUM_ROWS;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
 import com.example.carendlessgame.Interfaces.StepCallback;
+import com.example.carendlessgame.Utilities.GpsControl;
 import com.example.carendlessgame.Utilities.SignalGenerator;
+import com.example.carendlessgame.Utilities.SoundControl;
 import com.example.carendlessgame.Utilities.StepDetector;
-import com.example.carendlessgame.models.Records;
 import com.example.carendlessgame.models.Spaceship;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 
@@ -66,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean moveToLoseScreen = true;
     private int lastSensorX = 0;
     private LatLng userLatLng;
-    LocationManager locationManager;
+    private GpsControl gpsControl;
+    private SoundControl soundControl;
 
 
     @Override
@@ -81,6 +70,14 @@ public class MainActivity extends AppCompatActivity {
         if (!isSensor) {
             int fall_delay = prevIntent.getIntExtra(KEY_FALL_ROCKS_DELAY_MS, 0);
             int generate_delay = prevIntent.getIntExtra(KEY_GENERATE_ROCKS_DELAY_MS, 0);
+            boolean isFast = prevIntent.getBooleanExtra("IsFast", true);
+            if (isFast) {
+                main_TXT_speed.setText("Speed: fast");
+                main_TXT_speed.setTextColor(Color.rgb(181, 223, 255));
+            } else {
+                main_TXT_speed.setText("Speed: slow");
+                main_TXT_speed.setTextColor(Color.rgb(255, 181, 181));
+            }
             gameManager = new GameManager(fall_delay, generate_delay);
             main_BTN_left.setOnClickListener(v -> MoveTheSpaceship(-1));
             main_BTN_right.setOnClickListener(v -> MoveTheSpaceship(1));
@@ -91,19 +88,21 @@ public class MainActivity extends AppCompatActivity {
             main_BTN_right.setVisibility(INVISIBLE);
         }
 
+        soundControl = new SoundControl(this);
+
         spaceship = new Spaceship(NUM_COLUMNS / 2);
 
         handler.postDelayed(generateRocks, 75);
         handler.postDelayed(fallingRocks, 75);
 
-        locationManager = new LocationManager(this);
+        gpsControl = new GpsControl(this);
     }
 
     private void initStepDetector() {
         stepDetector = new StepDetector(this, new StepCallback() {
             @Override
             public void stepX() {
-                MoveTheSpaceshipBySensors2(stepDetector.getX());
+                MoveTheSpaceshipBySensors(stepDetector.getX());
             }
 
             @Override
@@ -214,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
-            checkSpaceshipCollison();
+            checkSpaceshipCollision();
             handler.postDelayed(this, gameManager.getFall_rocks_delay_ms());
         }
     };
@@ -302,30 +301,19 @@ public class MainActivity extends AppCompatActivity {
         main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(INVISIBLE);
         spaceship.setSpaceshipPosition(newSpaceshipPosition);
         main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(VISIBLE);
-        checkSpaceshipCollison();
+        checkSpaceshipCollision();
     }
 
     private void MoveTheSpaceshipBySensors(int sensorX) {
-        int newSpaceshipPosition;
-        if (sensorX > -3 && sensorX < 3)
-            newSpaceshipPosition = sensorX + 2;
-        else return;
-        main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(INVISIBLE);
-        spaceship.setSpaceshipPosition(newSpaceshipPosition);
-        main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(VISIBLE);
-        checkSpaceshipCollison();
-    }
-
-    private void MoveTheSpaceshipBySensors2(int sensorX) {
         if (sensorX == lastSensorX) return;
-        else if (sensorX > 2)
+        else if (sensorX > 3)
             MoveTheSpaceship(1);
-        else if (sensorX < -2)
+        else if (sensorX < -3)
             MoveTheSpaceship(-1);
         lastSensorX = sensorX;
     }
 
-    public void checkSpaceshipCollison() {
+    public void checkSpaceshipCollision() {
         ShapeableImageView rock_toCheck = main_IMG_rocks[NUM_ROWS - 1][spaceship.getSpaceshipPosition()];
         if (rock_toCheck.getTag() != null && rock_toCheck.getVisibility() == VISIBLE) {
             rock_toCheck.setVisibility(INVISIBLE);
@@ -338,15 +326,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onSpaceshipEarnCoin() {
+        soundControl.playCoinSound();
         gameManager.earnCoin();
+        main_TXT_odemeter.setText("Distance counter: " + gameManager.getDistance());
         SignalGenerator.getInstance().showToast("Earn Coin!!", 500);
         SignalGenerator.getInstance().vibrate(50);
-        SignalGenerator.getInstance().vibrate(50);
-
     }
 
     public void onSpaceshipHurt() {
-//        fireToastAndVibrate();
+        soundControl.playKnockSound();
         SignalGenerator.getInstance().showToast("Crash!!", 500);
         SignalGenerator.getInstance().vibrate(100);
         if (gameManager.getLives() - 1 <= 0)
@@ -359,7 +347,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onSpaceshipCrash() {
         if (moveToLoseScreen) {
-            gameManager.lose(locationManager.getLon(), locationManager.getLat());
+            gameManager.lose(gpsControl.getLon(), gpsControl.getLat());
             openLoseScreen(gameManager.getDistance());
             moveToLoseScreen = false;
         }

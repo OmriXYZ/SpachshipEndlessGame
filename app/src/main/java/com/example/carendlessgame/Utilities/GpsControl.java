@@ -1,13 +1,12 @@
-package com.example.carendlessgame;
+package com.example.carendlessgame.Utilities;
 
 import android.content.Context;
 
-public class LocationManager {
+public class GpsControl {
 
-    //location
     private GpsTracker gps;
 
-    public LocationManager(Context context) {
+    public GpsControl(Context context) {
         gps = new GpsTracker(context);
     }
 
@@ -18,10 +17,7 @@ public class LocationManager {
             return lat;
 
         }else{
-            // can't get location
-            // GPS or Network is not enabled
-            // Ask user to enable GPS/network in settings
-            gps.showSettingsAlert();
+            SignalGenerator.getInstance().showToast("Cannot get location", 300);
             return 0.0;
         }
     }
@@ -33,9 +29,6 @@ public class LocationManager {
             return lon;
 
         }else{
-            // can't get location
-            // GPS or Network is not enabled
-            // Ask user to enable GPS/network in settings
             return 0.0;
         }
     }

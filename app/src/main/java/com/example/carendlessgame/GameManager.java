@@ -57,11 +57,6 @@ public class GameManager {
         return generate_rocks_delay_ms;
     }
 
-    public void resetGame() {
-        lives = MAX_LIVE;
-        distance = 0;
-    }
-
     public void changeDelaysByStepY(int stepY) {
         fall_rocks_delay_ms = 500 + stepY;
         generate_rocks_delay_ms = fall_rocks_delay_ms*2;
@@ -72,7 +67,6 @@ public class GameManager {
     }
     public void lose(double lon, double lat) {
 
-//        Log.d("latlng:", lon+"");
         String fromSP = MySPv3.getInstance().getString("records","");
         Records recordsFromJson = new Gson().fromJson(fromSP, Records.class);
         if (recordsFromJson != null)
