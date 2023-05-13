@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -12,10 +11,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.util.Log;
-
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 
 class GpsTracker extends Service implements LocationListener {
@@ -48,7 +44,7 @@ class GpsTracker extends Service implements LocationListener {
         getLocation();
     }
 
-    public Location getLocation() {
+    public void getLocation() {
         try {
             locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
 
@@ -60,7 +56,7 @@ class GpsTracker extends Service implements LocationListener {
                     .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
             if (!isGPSEnabled && !isNetworkEnabled) {
-                // no network provider is enabled
+                SignalGenerator.getInstance().showToast("No network provider", 500);
             } else {
                 this.canGetLocation = true;
                 // First get location from Network Provider
@@ -117,7 +113,6 @@ class GpsTracker extends Service implements LocationListener {
             e.printStackTrace();
         }
 
-        return location;
     }
 
     public double getLatitude(){

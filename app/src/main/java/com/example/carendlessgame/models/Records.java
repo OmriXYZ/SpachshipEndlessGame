@@ -8,18 +8,11 @@ import java.util.Comparator;
 
 public class Records {
 
-    private ArrayList<Record> records = new ArrayList<>();
-//    private static Records myDB;
+    private final ArrayList<Record> records = new ArrayList<>();
 
     public Records() {
 
     }
-//    public static Records initMyDB() {
-//        if (myDB == null) {
-//            myDB = new Records();
-//        }
-//        return myDB;
-//    }
 
     public void add(Record record) {
         records.add(record);

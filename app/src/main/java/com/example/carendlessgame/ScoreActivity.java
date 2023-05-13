@@ -15,7 +15,7 @@ public class ScoreActivity extends AppCompatActivity {
     private ListFragment listFragment;
     private MapFragment mapFragment;
     private Button score_BTN_menu;
-    private CallBack_SendClick callBack_sendClick = new CallBack_SendClick() {
+    private final CallBack_SendClick callBack_sendClick = new CallBack_SendClick() {
 
         @Override
         public void mark(double lat, double lon) {

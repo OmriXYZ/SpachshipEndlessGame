@@ -1,11 +1,9 @@
 package com.example.carendlessgame.Fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -14,7 +12,6 @@ import androidx.fragment.app.Fragment;
 import com.example.carendlessgame.Interfaces.CallBack_SendClick;
 import com.example.carendlessgame.R;
 import com.example.carendlessgame.Utilities.MySPv3;
-import com.example.carendlessgame.models.Record;
 import com.example.carendlessgame.models.Records;
 import com.google.gson.Gson;
 
@@ -46,13 +43,7 @@ public class ListFragment extends Fragment {
             ArrayAdapter<String> adapter = new ArrayAdapter<>(view.getContext(),
                     android.R.layout.simple_list_item_1, itemList);
             list_LST_records.setAdapter(adapter);
-            list_LST_records.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view,
-                                        int position, long id) {
-                    callBack_sendClick.mark(recordsFromJson.getRecords().get(position).getLat(),recordsFromJson.getRecords().get(position).getLon());
-                }
-            });
+            list_LST_records.setOnItemClickListener((parent, view1, position, id) -> callBack_sendClick.mark(recordsFromJson.getRecords().get(position).getLat(),recordsFromJson.getRecords().get(position).getLon()));
         }
         else {
             return view;

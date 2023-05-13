@@ -4,14 +4,14 @@ import android.content.Context;
 
 public class GpsControl {
 
-    private GpsTracker gps;
+    private final GpsTracker gps;
 
     public GpsControl(Context context) {
         gps = new GpsTracker(context);
     }
 
     public double getLat () {
-        double lat=0.0;
+        double lat;
         if(gps.canGetLocation()){
             lat = gps.getLatitude();
             return lat;
@@ -23,7 +23,7 @@ public class GpsControl {
     }
 
     public double getLon () {
-        double lon = 0.0;
+        double lon;
         if(gps.canGetLocation()){
             lon = gps.getLongitude();
             return lon;

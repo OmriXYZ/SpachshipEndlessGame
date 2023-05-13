@@ -8,7 +8,7 @@ public class MySPv3 {
     private static final String DB_FILE = "DB_FILE";
 
     private static MySPv3 instance = null;
-    private SharedPreferences sharedPreferences;
+    private final SharedPreferences sharedPreferences;
 
     private MySPv3(Context context) {
         sharedPreferences = context.getSharedPreferences(DB_FILE, Context.MODE_PRIVATE);

@@ -14,8 +14,4 @@ public class Spaceship {
     public void setSpaceshipPosition(int spaceshipPosition) {
         this.spaceshipPosition = spaceshipPosition;
     }
-
-    public void resetSpaceshipPosition(int pos) {
-        spaceshipPosition = pos;
-    }
 }

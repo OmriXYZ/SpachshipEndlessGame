@@ -1,9 +1,10 @@
 package com.example.carendlessgame.models;
 
 public class Record {
-    private int score;
+    private final int score;
 
-    private double lon, lat;
+    private final double lon;
+    private final double lat;
 
     public Record(int score, double lon, double lat) {
         this.score = score;

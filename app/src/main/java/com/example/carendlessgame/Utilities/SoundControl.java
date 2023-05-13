@@ -7,12 +7,12 @@ import com.example.carendlessgame.R;
 
 public class SoundControl {
 
-    private MediaPlayer knock_sound, coin_sound;
+    private final MediaPlayer knock_sound;
+    private final MediaPlayer coin_sound;
 
     public SoundControl(Context context) {
         this.knock_sound =  MediaPlayer.create(context, R.raw.knock);
         this.coin_sound =  MediaPlayer.create(context, R.raw.coin);
-
     }
 
     public void playKnockSound() {

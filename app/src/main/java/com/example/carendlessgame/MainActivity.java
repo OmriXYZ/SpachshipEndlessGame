@@ -2,7 +2,6 @@ package com.example.carendlessgame;
 
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
-
 import static com.example.carendlessgame.GameManager.NUM_COLUMNS;
 import static com.example.carendlessgame.GameManager.NUM_ROWS;
 
@@ -24,7 +23,6 @@ import com.example.carendlessgame.Utilities.SignalGenerator;
 import com.example.carendlessgame.Utilities.SoundControl;
 import com.example.carendlessgame.Utilities.StepDetector;
 import com.example.carendlessgame.models.Spaceship;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 
@@ -37,23 +35,21 @@ public class MainActivity extends AppCompatActivity {
     private ShapeableImageView[][] main_IMG_rocks;
     private FloatingActionButton main_BTN_left;
     private FloatingActionButton main_BTN_right;
-    private TextView main_TXT_odemeter;
+    private TextView main_TXT_odometer;
     private TextView main_TXT_speed;
-    private Random random = new Random();
+    private final Random random = new Random();
     public static final String KEY_FALL_ROCKS_DELAY_MS = "KEY_FALL_DELAY";
     public static final String KEY_GENERATE_ROCKS_DELAY_MS = "KEY_GENERATE_DELAY";
-    private int theNextRandomRock;
-    private int[] rocksFirstRow = new int[]{0, 0, 0, 0, 0};
+    private final int[] rocksFirstRow = new int[]{0, 0, 0, 0, 0};
     private final Handler handler = new Handler();
     private Spaceship spaceship;
     private boolean isPause = false;
-    private String rock = "rock";
-    private String coin = "coin";
+    private final String rock = "rock";
+    private final String coin = "coin";
     private GameManager gameManager;
     private StepDetector stepDetector;
     private boolean moveToLoseScreen = true;
     private int lastSensorX = 0;
-    private LatLng userLatLng;
     private GpsControl gpsControl;
     private SoundControl soundControl;
 
@@ -182,10 +178,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private Runnable fallingRocks = new Runnable() {
+    private final Runnable fallingRocks = new Runnable() {
         @Override
         public void run() {
-            main_TXT_odemeter.setText("Distance counter: " + gameManager.addOneDistance());
+            main_TXT_odometer.setText("Distance counter: " + gameManager.addOneDistance());
             for (int row = NUM_ROWS - 1; row >= 0; row--) {
                 for (int col = 0; col < NUM_COLUMNS; col++) {
                     ShapeableImageView checkRock = main_IMG_rocks[row][col];
@@ -218,11 +214,11 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private Runnable generateRocks = new Runnable() {
+    private final Runnable generateRocks = new Runnable() {
         @Override
         public void run() {
             handler.postDelayed(generateRocks, gameManager.getGenerate_rocks_delay_ms());
-            theNextRandomRock = random.nextInt(NUM_COLUMNS);
+            int theNextRandomRock = random.nextInt(NUM_COLUMNS);
             rocksFirstRow[theNextRandomRock] = 1;
         }
     };
@@ -289,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
         main_IMG_rocks[7][3] = findViewById(R.id.main_IMG_rock73);
         main_IMG_rocks[7][4] = findViewById(R.id.main_IMG_rock74);
 
-        main_TXT_odemeter = findViewById(R.id.main_TXT_odemeter);
+        main_TXT_odometer = findViewById(R.id.main_TXT_odemeter);
         main_TXT_speed = findViewById(R.id.main_TXT_speed);
 
     }
@@ -328,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
     private void onSpaceshipEarnCoin() {
         soundControl.playCoinSound();
         gameManager.earnCoin();
-        main_TXT_odemeter.setText("Distance counter: " + gameManager.getDistance());
+        main_TXT_odometer.setText("Distance counter: " + gameManager.getDistance());
         SignalGenerator.getInstance().showToast("Earn Coin!!", 500);
         SignalGenerator.getInstance().vibrate(50);
     }
@@ -351,7 +347,6 @@ public class MainActivity extends AppCompatActivity {
             openLoseScreen(gameManager.getDistance());
             moveToLoseScreen = false;
         }
-
     }
 
     private void openLoseScreen(int distance) {

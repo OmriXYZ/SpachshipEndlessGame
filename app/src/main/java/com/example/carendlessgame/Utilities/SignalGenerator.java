@@ -1,17 +1,18 @@
 package com.example.carendlessgame.Utilities;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.view.View;
 import android.widget.Toast;
 
 public class SignalGenerator {
 
+    @SuppressLint("StaticFieldLeak")
     private static SignalGenerator instance;
-    private Context context;
+    private final Context context;
     private static Vibrator vibrator;
     private Toast toast;
 
