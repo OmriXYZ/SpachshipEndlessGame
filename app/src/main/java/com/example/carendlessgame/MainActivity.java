@@ -20,7 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.carendlessgame.Interfaces.StepCallback;
 import com.example.carendlessgame.Utilities.GpsControl;
 import com.example.carendlessgame.Utilities.SignalGenerator;
-import com.example.carendlessgame.Utilities.SoundControl;
+import com.example.carendlessgame.Utilities.SoundPoolControl;
 import com.example.carendlessgame.Utilities.StepDetector;
 import com.example.carendlessgame.models.Spaceship;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean moveToLoseScreen = true;
     private int lastSensorX = 0;
     private GpsControl gpsControl;
-    private SoundControl soundControl;
+    private SoundPoolControl soundControl;
 
 
     @Override
@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
             main_BTN_right.setVisibility(INVISIBLE);
         }
 
-        soundControl = new SoundControl(this);
+        soundControl = new SoundPoolControl(this);
 
         spaceship = new Spaceship(NUM_COLUMNS / 2);
 
@@ -172,10 +172,9 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         handler.removeCallbacks(generateRocks);
         handler.removeCallbacks(fallingRocks);
-        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        if (vibrator.hasVibrator()) {
-            vibrator.cancel();
-        }
+        SignalGenerator.getInstance().onDestroy();
+        soundControl.release();
+
     }
 
     private final Runnable fallingRocks = new Runnable() {
@@ -322,7 +321,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onSpaceshipEarnCoin() {
-        soundControl.playCoinSound();
+        soundControl.playShortResource(R.raw.coin);
         gameManager.earnCoin();
         main_TXT_odometer.setText("Distance counter: " + gameManager.getDistance());
         SignalGenerator.getInstance().showToast("Earn Coin!!", 500);
@@ -330,7 +329,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onSpaceshipHurt() {
-        soundControl.playKnockSound();
+        soundControl.playShortResource(R.raw.knock);
         SignalGenerator.getInstance().showToast("Crash!!", 500);
         SignalGenerator.getInstance().vibrate(100);
         if (gameManager.getLives() - 1 <= 0)

@@ -57,4 +57,9 @@ public class SignalGenerator {
             vibrator.vibrate(length);
         }
     }
+    public void onDestroy() {
+        if (vibrator.hasVibrator()) {
+            vibrator.cancel();
+        }
+    }
 }
