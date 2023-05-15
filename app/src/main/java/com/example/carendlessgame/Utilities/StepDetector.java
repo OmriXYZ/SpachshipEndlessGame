@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 import com.example.carendlessgame.Interfaces.StepCallback;
 
@@ -12,9 +13,10 @@ public class StepDetector {
     private final Sensor sensor;
     private final SensorManager sensorManager;
     private final StepCallback stepCallback;
-
-    private int stepX = 0;
-    private int stepY = 0;
+    private boolean tiltedLeft = false;
+    private boolean tiltedRight = false;
+    private boolean tiltedUp = false;
+    private boolean tiltedDown = false;
     private SensorEventListener sensorEventListener;
 
     public StepDetector(Context context, StepCallback stepCallback) {
@@ -30,10 +32,9 @@ public class StepDetector {
             public void onSensorChanged(SensorEvent event) {
                 float x = event.values[0];
                 float y = event.values[1];
-                stepX = -(int) (x / 1.5);
-                stepY =  (int) (y / 1.5);
-                stepCallback.stepX();
-                stepCallback.stepY();
+                onSensorChangedX(x);
+                onSensorChangedY(y-7);
+
             }
 
             @Override
@@ -43,12 +44,35 @@ public class StepDetector {
         };
     }
 
-    public int getY() {
-        return this.stepY;
+    public void onSensorChangedX(float x) {
+        if (x < -5 && !tiltedLeft && !tiltedRight) {
+            stepCallback.stepX(1);
+            tiltedLeft = true;
+        }
+        // Check if the phone is tilted right
+        else if (x > 5 && !tiltedRight && !tiltedLeft) {
+            stepCallback.stepX(-1);
+            tiltedRight = true;
+        }
+        // Check if the phone is back in the center
+        else if (x > -5 && x < 5) {
+            tiltedLeft = false;
+            tiltedRight = false;
+        }
     }
-
-    public int getX() {
-        return this.stepX;
+    public void onSensorChangedY(float y) {
+        if (y < -4 && !tiltedDown && !tiltedUp) {
+            stepCallback.stepY(-1);
+            tiltedDown = true;
+        }
+        else if (y > 2 && !tiltedUp && !tiltedDown) {
+            stepCallback.stepY(1);
+            tiltedUp = true;
+        }
+        else if (y > -2 && y < 2) {
+            tiltedDown = false;
+            tiltedUp = false;
+        }
     }
 
     public void start() {

@@ -2,9 +2,7 @@ package com.example.carendlessgame.Interfaces;
 
 public interface StepCallback {
 
-    void stepX();
+    void stepX(int pos);
 
-    void stepY();
-
-    void stepZ();
+    void stepY(int pos);
 }

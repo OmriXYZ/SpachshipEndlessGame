@@ -29,7 +29,6 @@ import com.google.android.material.imageview.ShapeableImageView;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
-
     private ShapeableImageView[] main_IMG_spaceships;
     private ShapeableImageView[] main_IMG_hearts;
     private ShapeableImageView[][] main_IMG_rocks;
@@ -48,8 +47,8 @@ public class MainActivity extends AppCompatActivity {
     private final String coin = "coin";
     private GameManager gameManager;
     private StepDetector stepDetector;
+    private int yIndexSensor = 0;
     private boolean moveToLoseScreen = true;
-    private int lastSensorX = 0;
     private GpsControl gpsControl;
     private SoundPoolControl soundControl;
 
@@ -61,52 +60,58 @@ public class MainActivity extends AppCompatActivity {
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         main_IMG_rocks = new ShapeableImageView[NUM_ROWS][NUM_COLUMNS];
         findViews();
+        //Getting conditions from menu
         Intent prevIntent = getIntent();
         boolean isSensor = prevIntent.getBooleanExtra("IsSensor", false);
         if (!isSensor) {
-            int fall_delay = prevIntent.getIntExtra(KEY_FALL_ROCKS_DELAY_MS, 0);
-            int generate_delay = prevIntent.getIntExtra(KEY_GENERATE_ROCKS_DELAY_MS, 0);
-            boolean isFast = prevIntent.getBooleanExtra("IsFast", true);
-            if (isFast) {
-                main_TXT_speed.setText("Speed: fast");
-                main_TXT_speed.setTextColor(Color.rgb(181, 223, 255));
-            } else {
-                main_TXT_speed.setText("Speed: slow");
-                main_TXT_speed.setTextColor(Color.rgb(255, 181, 181));
-            }
-            gameManager = new GameManager(fall_delay, generate_delay);
-            main_BTN_left.setOnClickListener(v -> MoveTheSpaceship(-1));
-            main_BTN_right.setOnClickListener(v -> MoveTheSpaceship(1));
+            initButtonsGame(prevIntent);
         } else {
-            initStepDetector();
-            gameManager = new GameManager();
-            main_BTN_left.setVisibility(INVISIBLE);
-            main_BTN_right.setVisibility(INVISIBLE);
+            initSensorGame();
         }
 
         soundControl = new SoundPoolControl(this);
-
         spaceship = new Spaceship(NUM_COLUMNS / 2);
-
         handler.postDelayed(generateRocks, 75);
         handler.postDelayed(fallingRocks, 75);
 
         gpsControl = new GpsControl(this);
     }
 
+    private void initSensorGame() {
+        initStepDetector();
+        gameManager = new GameManager();
+        main_BTN_left.setVisibility(INVISIBLE);
+        main_BTN_right.setVisibility(INVISIBLE);
+    }
+    private void initButtonsGame(Intent prevIntent) {
+        int fall_delay = prevIntent.getIntExtra(KEY_FALL_ROCKS_DELAY_MS, 0);
+        int generate_delay = prevIntent.getIntExtra(KEY_GENERATE_ROCKS_DELAY_MS, 0);
+        boolean isFast = prevIntent.getBooleanExtra("IsFast", true);
+        if (isFast) {
+            main_TXT_speed.setText("Speed: fast");
+            main_TXT_speed.setTextColor(Color.rgb(181, 223, 255));
+        } else {
+            main_TXT_speed.setText("Speed: slow");
+            main_TXT_speed.setTextColor(Color.rgb(255, 181, 181));
+        }
+        gameManager = new GameManager(fall_delay, generate_delay);
+        main_BTN_left.setOnClickListener(v -> MoveTheSpaceship(-1));
+        main_BTN_right.setOnClickListener(v -> MoveTheSpaceship(1));
+    }
+
     private void initStepDetector() {
         stepDetector = new StepDetector(this, new StepCallback() {
             @Override
-            public void stepX() {
-                MoveTheSpaceshipBySensors(stepDetector.getX());
+            public void stepX(int pos) {
+                MoveTheSpaceship(pos);
             }
-
             @Override
-            public void stepY() {
-                int stepY = stepDetector.getY() - 4;
-                if (stepY >= -2 && stepY <= 2)
-                    gameManager.changeDelaysByStepY((stepY) * 70);
-                switch (stepY) {
+            public void stepY(int pos) {
+                int newIndexY = yIndexSensor + pos;
+                if (newIndexY > 2 || newIndexY < -2) return;
+                yIndexSensor = newIndexY;
+                gameManager.changeDelaysByStepY((yIndexSensor) * 70);
+                switch (yIndexSensor) {
                     case 0:
                         main_TXT_speed.setText("Speed: moderate");
                         main_TXT_speed.setTextColor(Color.rgb(255, 255, 255));
@@ -129,11 +134,6 @@ public class MainActivity extends AppCompatActivity {
                         break;
 
                 }
-            }
-
-            @Override
-            public void stepZ() {
-                // Pass
             }
         });
     }
@@ -161,10 +161,6 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         handler.removeCallbacks(generateRocks);
         handler.removeCallbacks(fallingRocks);
-        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        if (vibrator.hasVibrator()) {
-            vibrator.cancel();
-        }
     }
 
     @Override
@@ -174,7 +170,6 @@ public class MainActivity extends AppCompatActivity {
         handler.removeCallbacks(fallingRocks);
         SignalGenerator.getInstance().onDestroy();
         soundControl.release();
-
     }
 
     private final Runnable fallingRocks = new Runnable() {
@@ -298,16 +293,6 @@ public class MainActivity extends AppCompatActivity {
         main_IMG_spaceships[spaceship.getSpaceshipPosition()].setVisibility(VISIBLE);
         checkSpaceshipCollision();
     }
-
-    private void MoveTheSpaceshipBySensors(int sensorX) {
-        if (sensorX == lastSensorX) return;
-        else if (sensorX > 3)
-            MoveTheSpaceship(1);
-        else if (sensorX < -3)
-            MoveTheSpaceship(-1);
-        lastSensorX = sensorX;
-    }
-
     public void checkSpaceshipCollision() {
         ShapeableImageView rock_toCheck = main_IMG_rocks[NUM_ROWS - 1][spaceship.getSpaceshipPosition()];
         if (rock_toCheck.getTag() != null && rock_toCheck.getVisibility() == VISIBLE) {
